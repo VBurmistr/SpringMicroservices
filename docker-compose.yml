@@ -1,0 +1,43 @@
+version: '3.1'
+services:
+  app:
+    container_name: SecondLabSpring
+    image: tomcat_server_with_second_lab
+    environment:
+      profile: docker
+    build:
+      dockerfile: Dockerfile
+      context: lab2
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/SecondLabSpring/searchbooks" ]
+      interval: 1m
+    ports:
+      - "8888:8080"
+    depends_on:
+      - postgresqldb
+  smart-adder:
+    container_name: SmartAdderService
+    image: smart_adder_service
+    environment:
+      profile: docker
+    build:
+      dockerfile: Dockerfile
+      context: lab3
+    restart: always
+    depends_on:
+      - app
+  postgresqldb:
+    container_name: postgresqldb
+    image: postgres-for-second-lab
+    build:
+      context: .
+      dockerfile: postgres.dockerfile
+    volumes:
+      - postgresvolume:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+      - POSTGRES_DB=lab2
+      - POSTGRES_PASSWORD=zsecsq
+      - POSTGRES_USER=postgres
+volumes:
+  postgresvolume:
